@@ -18,5 +18,5 @@ A `.twbx` version of the Tableau workbook is also included in this repository. T
 - [Our World in Data COVID-19 Dataset](https://github.com/owid/covid-19-data) – Dataset providing global COVID-19 statistics, including cases, deaths, vaccinations, and other key health indicators.
 
 **Note:**  
-The Our World in Data (OWID) COVID-19 dataset was last updated August 19, 2024. The repository has since been archived by OWID; this analysis reflects the historical pandemic 
+The Our World in Data (OWID) COVID-19 dataset was last updated August 19, 2024. The repository has since been archived by OWID. This analysis reflects the historical pandemic 
 record through that date.

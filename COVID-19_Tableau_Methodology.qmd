@@ -1,0 +1,602 @@
+---
+title: "COVID-19 Tableau Project Methodology"
+format: html
+editor: visual
+---
+
+# Data Preparation
+
+-   Data source: Our World in Data COVID-19 dataset
+-   Date range: January 1, 2020 – August 14, 2024
+-   Removed aggregate locations (World, continents, income groups) by filtering rows where `continent` was not missing.
+-   Spot-checked several countries (United States, India, Brazil, Iceland, Fiji, Luxembourg) for reporting gaps.
+
+# Calculated Fields
+
+## 1. Case Fatality Rate (CFR)
+
+**Calculated Field**
+
+`SUM([Total Deaths]) / SUM([Total Cases])`
+
+**Purpose**
+
+Measures the proportion of reported COVID-19 cases that resulted in death.
+
+**Validation**
+
+-   Checked country-level CFR values.
+-   Values were within expected low single-digit percentages.
+-   No negative or extreme values were observed.
+
+## 2. Vaccination Rate
+
+**Calculated Field**
+
+`AVG([People Fully Vaccinated Per Hundred]) / 100`
+
+**Purpose**
+
+Calculates the average reported percentage of fully vaccinated individuals and converts the value into a percentage format.
+
+**Validation**
+
+-   Checked country-level vaccination rates.
+-   Values were within expected 0-100% range.
+
+## 3. Vaccination Rate (Max 100%)
+
+**Calculated Field**
+
+`IIF([Vaccination Rate] > 1, 1, [Vaccination Rate])`
+
+**Purpose**
+
+Ensures vaccination rates remain within the valid 0–100% range. If a value exceeds 100% due to aggregation issues, it is adjusted to 100% to prevent unrealistic percentages in visualizations.
+
+**Validation**
+
+-   Confirmed that vaccination rates remained between 0% and 100%.
+-   Checked that no invalid percentage values appeared in visualizations.
+
+------------------------------------------------------------------------
+
+# Trend Analysis and Parameters
+
+## 1. 7-Day Rolling Average
+
+**Calculated Field**
+
+`WINDOW_AVG(SUM([new_cases]), -6, 0)`
+
+**Purpose**
+
+Calculates a 7-day rolling average of daily new COVID-19 cases by averaging the current day and the previous six days. In the formula, `-6` represents the six previous days included in the calculation, and `0` represents the current day.
+
+**Validation** - Created a line chart using daily dates and a selected country. - Compared the 7-day rolling average with daily new cases and confirmed that the trend was smoother. - Checked that the calculation used a 7-day window across dates.
+
+## 2. Date Range Filter
+
+**Method**
+
+Used Tableau's built-in date range filter to allow selection of the time period displayed in visualizations.
+
+**Steps**
+
+1.  Drag date into filter in worksheet.
+2.  Select **Range of Dates**.
+3.  Adjust minimum and maximum dates.
+
+**Alternative**
+
+1.  Create parameter: Start Date
+2.  Data Type: Date
+3.  Set current value: 8/14/2024 as example
+4.  Create calculated field:
+
+-   Name: Date Range Filter
+
+-   **Calculated Field**: `[date] >= [Start Date] AND [date] <= [End Date]`
+
+-   Meaning:
+
+    -   \[`date] >= [Start Date]`: Keep dates after or equal to the selected start date.
+
+    -   `[date] <= [End Date]`: Keep dates before or equal to the selected end date.
+
+5.  Drag to filter and select TRUE.
+6.  Right-click `Start Date` and select **Show Parameter**, repeat for `End Date`.
+
+**Purpose**
+
+Allows users to focus on specific periods of the COVID-19 timeline and adjust the range of dates shown in trend analysis.
+
+**Validation**
+
+-   Confirmed that changing the date range updated the visualization correctly.
+-   Verified that only dates within the selected range were displayed.
+
+## 3. Country Selector Filter
+
+**Parameter**
+
+Country Selector
+
+**Data Type**
+
+String
+
+**Calculated Field**
+
+\[location\] = \[Country Selector\]
+
+**Purpose**
+
+Allows users to select a single country and update country-specific trend visualizations.
+
+**Validation**
+
+-   Confirmed that changing the selected country updates the visualization.
+-   Verified that only the selected country's data is displayed.
+
+## 4. Metric Selector Parameter
+
+**Parameter**
+
+Metric Selector
+
+**Data Type**
+
+String
+
+**Calculated Field**
+
+``` tableau
+CASE [Metric Selector]
+WHEN "Cases" THEN SUM([New Cases])
+WHEN "Deaths" THEN SUM([New Deaths])
+WHEN "Vaccination Rate" THEN [Vaccination Rate (Max 100%)]
+END
+```
+
+**Purpose**
+
+Allows users to switch between different COVID-19 metrics within the same visualization.
+
+**Validation**
+
+-   Confirmed that changing the parameter updates the selected metric.
+-   Verified that each metric displays the expected measure (new cases, new deaths, and vaccination rate).
+
+------------------------------------------------------------------------
+
+# Dashboard Wireframe
+
+## Dashboard Goal
+
+This dashboard explores global COVID-19 trends by analyzing changes in cases, deaths, vaccination rates, and differences between countries.
+
+## Planned Dashboard Pages
+
+### Overview
+
+Provides a summary of global COVID-19 trends using KPI cards, time-series charts, and country comparisons.
+
+### Geographic View
+
+Displays geographic differences using maps and regional comparisons by continent and income level.
+
+### Risk & Vaccination Explorer
+
+Examines relationships between vaccination rates, case fatality rates, and country-level outcomes.
+
+## Planned Layout
+
+### Overview
+
+-   Date range, country, and metric filters
+-   KPI cards (Total Cases, Total Deaths, CFR, Vaccination Rate)
+-   Main time-series trend chart
+-   Top 10 countries comparison chart
+
+### Geographic View
+
+-   World choropleth map
+-   Continent comparison chart
+-   Income level comparison chart
+
+### Risk & Vaccination Explorer
+
+-   Vaccination rate comparison
+-   Case fatality rate comparison
+-   Country trend comparison
+
+## Dashboard Story
+
+The dashboard is designed to show how COVID-19 trends changed over time, compare outcomes across countries, and explore geographic patterns and vaccination progress.
+
+------------------------------------------------------------------------
+
+# Test Visualizations
+
+## Purpose
+
+Tested core visualizations before beginning full dashboard development to identify calculation, filtering, and visualization issues.
+
+## Visualizations Tested
+
+## 1. Time-Series Trend Chart
+
+-   Tested the Metric Selector Parameter using cases, deaths, and vaccination rate.
+-   Confirmed that the visualization updated when changing the selected metric and country.
+-   Cases and deaths showed expected wave patterns over time.
+-   Vaccination rate showed an increasing trend during the vaccination period.
+
+## 2. World Choropleth Map
+
+-   Confirmed that location data was recognized as geographic data in Tableau.
+-   Verified that the selected metric displayed correctly using map colors.
+-   Confirmed that countries were displayed correctly on the map.
+
+## 3. Vaccination Rate vs. CFR Scatter Plot
+
+-   Confirmed that each mark represented a country.
+-   Verified that vaccination rates remained between 0% and 100%.
+-   Checked that CFR values were within reasonable ranges.
+-   No calculation or visualization errors were identified.
+
+## Results
+
+-   Calculated fields produced expected values.
+-   Parameters and filters worked correctly across test visualizations.
+-   The tested visualizations aligned with the planned dashboard structure.
+
+------------------------------------------------------------------------
+
+# Global and Country Time-Series Analysis
+
+## Purpose
+
+Built time-series visualizations to examine COIVD-19 trends over time at both global and country levels. These charts allow users to compare changes in cases, deaths, and vaccination rates using interactive metric and country selection parameters.
+
+------------------------------------------------------------------------
+
+## 1. Country Trend Chart
+
+**Purpose**
+
+Displays COVID-19 trends for a sleected country using interactive parameters.
+
+**Visualization Setup**
+
+-   Reused the test time-series visualization created during the validation phase.
+-   Date was placed on Columns using daily-level continuous dates.
+-   Selected Metric was placed on Rows.
+-   Created a line chart to display changes over time.
+-   Added the Country Selector parameter to filter the visualization to a selected country.
+
+**Validation**
+
+-   Confirmed that changing the Country Selector updated the trend line correctly.
+-   Tested multiple countries to verify that values changed appropriately.
+-   Tested the Metric Selector using cases, deaths, and vaccination rate.
+-   Confirmed that cases and deaths displayed expected fluctuations over time.
+-   Confirmed that vaccination rate showed a gradual increasing trend.
+
+## 2. Global trend Chart
+
+**Purpose**
+
+Displays worldwide COVID-19 trends over time without restricting the visualization to a single country.
+
+**Visualization Setup**
+
+-   Duplicated the country trend worksheet.
+-   Removed the Country Selector filter to create a global level view.
+-   Used the Metric Selector parameter to switch between cases, deaths, and vaccination rate.
+-   Used a line chart to display global trends over time.
+
+**Validation**
+
+-   Confirmed that the chart displayed aggregated global trends.
+-   Verified that changing the Metric Selector updated the visualization correctly.
+-   Used average vaccination rate to display global vaccination progress over time.
+-   Confirmed that vaccination values remained within the valid 0% to 100% range.
+
+## Notes
+
+-   The original test visualization was successfully incorporated into the Week 2 dashboard development.
+-   The time-series charts will serve as the main trend visualizations for the Overview dashboard page.
+
+------------------------------------------------------------------------
+
+# Global Choloropleth Map
+
+## Purpose
+
+Created a world map visualization to compare COVID-19 impact across countries using population-adjusted case counts.
+
+## Map Setup
+
+-   Created a geographic map using the `location` field.
+-   Verified that Tableau recognized country names and generated country-level map regions.
+-   Applied `toal_cases_per_million` as the color metric to compare COVID-19 impact while accounting for differences in population size.
+
+## Aggregation Choice
+
+-   Used `MAX(total_cases_per_million)` instead of `SUM(total_cases_per_million)`.
+-   Since each country has multiple records over time, using SUM would incorrectly add the same cumulative measure across different dates.
+-   Used MAX to select the highest cumulative value for each country.
+
+## Filtering
+
+-   Applied a continent filter to remove aggregate records such as World, regions, and income groups.
+-   Added a date filter to allow selection of the reporting date or range of dates.
+
+## Validation
+
+-   Confirmed that countries were mapped correctly and no major geographic errors were identified.
+-   Verified that map colors displayed reasonable differences between countries.
+
+## Development Note
+
+-   Built upon the choropleth map tested during the validation phase.
+-   The test visualization was refined by adding the final metric, filters, and formatting adjustments.
+
+------------------------------------------------------------------------
+
+# Top 10 Country Comparisons
+
+## Purpose
+
+Created bar charts to compare countries based on total COVID-19 cases, case fatality rate (CFR), and vaccination rate.
+
+## 1. Top 10 Countries by Total Cases
+
+-   Created a horizontal bar chart ranking countries by cumulative COVID-19 cases.
+-   Used `MAX(total_cases)` because the dataset contains multiple records per country over time, and summing cumulative values across dates would incorrectly inflate totals.
+-   Applied a Top 10 filter and removed aggregate records (such as World and regions) using the continent filter.
+-   Sorted countries from highest to lowest total cases.
+
+## 2. Top 10 Countries by Case Fatality Rate (CFR)
+
+-   Created a horizontal bar chart ranking countries by CFR.
+-   Applied a Top 10 filter based on CFR values and sorted countries from highest to lowest.
+-   Kept the calculated field as an aggregated calculation (`AGG(Case Fatality Rate (CFR))`) since the formula already calculates the ratio of total deaths to total cases.
+-   Verified that CFR values were within reasonable ranges.
+-   Noted that countries with fewer reported cases may have higher variation in CFR because small changes in deaths can greatly affect the percentage.
+
+## 3. Top 10 Countries by Vaccination Rate
+
+-   Created a horizontal bar chart ranking countires by vaccination rate.
+-   Used `MAX(Vaccination Rate (Max 100%))` because vaccination rates increase over time, and the maximum value represents the highest/latest reported vaccination coverage for each country.
+-   Applied a Top 10 filter and verified that vaccination rates remained between 0% and 100%.
+
+## Formatting
+
+-   Applied consistent formatting across all three bar charts.
+-   Standardized chart titles using the format "Top 10 Countries by \[Metric\]."
+-   Simplified tooltips to display only the country name and corresponding metric value.
+-   Ensured charts were sorted in descending order for easier comparison.
+
+## Validation
+
+-   Confirmed that each chart displayed the correct Top 10 countries based on the selected metric.
+
+-   Verified that cumulative measures (total cases and vaccination rate) were not incorrectly summed across dates.
+
+-   Checked that aggregate records such as World and regional groups were removed from the rankings.
+
+-   Verified that CFR values were displayed as percentages and remained within reasonable ranges.
+
+-   Confirmed that vaccination rates remained between 0% and 100%.
+
+-   Checked that sorting and filtering updated the charts correctly.
+
+------------------------------------------------------------------------
+
+# Geographic and Socioeconomic Breakdowns
+
+## Purpose
+
+Created additional visualizations to examine differences in COVID-19 outcomes across geographic and socioeconomic factors. These breakdowns compare case fatality rates across continents and income levels and explore whether population density is related to COVID-19 fatality rates.
+
+## 1. Case Fatality Rate by Continent
+
+**Visualization Setup**
+
+-   Created a bar chart comparing CFR across continents.
+-   Used the calculated CFR field and kept it as `AGG(Case Fatality Rate (CFR))` because the calculation already uses total deaths and total cases.
+-   Sorted continents by CFR and formatted values as percentages.
+
+**Validation**
+
+-   Confirmed that all continents were displayed correctly.
+-   Checked that no blank or missing continent categories appeared.
+-   Verified that CFR values were displayed as percentages and remained within reasonable ranges.
+
+## 2. Case Fatality Rate by Income Level
+
+**Formula**
+
+`IF [gdp_per_capita] < 1136 THEN "Low income"`
+
+`ELSEIF [gdp_per_capita] < 4466 THEN "Lower-middle income"`
+
+`ELSEIF [gdp_per_capita] < 13845 THEN "Upper-middle income"`
+
+`ELSE "High income"`
+
+`END`
+
+**Visualization Setup**
+
+-   Grouped countries into income categories using GDP per capita.
+-   Compared CFR across low, lower-middle, upper-middle, and high income groups.
+-   Used `AGG(Case Fatality Rate (CFR))` to calculate CFR for each income category.
+
+**Validation**
+
+-   Checked that income categories were assigned correctly.
+-   Verified that countries with missing GDP per capita values did not create unexpected categories.
+-   Confirmed that CFR values were displayed correctly as percentages.
+
+## 3. Vaccination Rate vs. Case Fatality Rate
+
+**Visualization Setup**
+
+-   Created a scatter plot to explore the relationship between vaccination rate and CFR.
+-   Used the calculated Vaccination Rate field and kept it as `AGG(Vaccination Rate)` because the field is already a calculated measure based on reported vaccination percentages.
+-   Added `location` to Detail so each point represented an individual country.
+-   Formatted vaccination rate and CFR values as percentages for easier interpretation.
+-   Applied a logarithmic scale to improve visualization of countries with a wide range of values.
+
+**Validation**
+
+-   Confirmed that each point represented an individual country.
+-   Checked that vaccination rates remained within the expected 0% to 100% range.
+-   Verified that CFR values were displayed as percentages and remained within reasonable ranges.
+-   Observed differences in CFR across countries with varying vaccination coverage levels, while noting that other factors such as healthcare systems, reporting practices, and testing differences may also influence CFR.
+
+# 4. Population Density vs. Case Fatality Rate
+
+**Formula**
+
+Population density: Population Density = Population / Land Area
+
+**Visualization Setup**
+
+-   Created a scatter plot to explore the relationship between population density and CFR.
+-   Used `AVG(population_density)` because population density is a ratio-based measurement and should not be summed across dates.
+-   Added location to Detail so each point represented an individual country.
+-   Applied a logarithmic scale to population density to better display countries with a wide range of density values.
+
+**Validation** - Confirmed that each point represented an individual country. - Checked that population density values were displayed correctly and no aggregation issues occurred. - Verified that CFR values were within reasonable ranges. - Observed that most countries were concentrated at lower population density levels, with a small number of highly dense countries appearing as outliers.
+
+------------------------------------------------------------------------
+
+# Trend Comparison Charts
+
+## Purpose
+
+Created trend comparison visualizations to compare COVID-19 patterns across multiple countries and geographic groups. These charts allow comparison of changes in COVID-19 cases, deaths, and vaccination rates over time.
+
+## 1. Multi-Country Trend Comparison
+
+**Visualization Setup**
+
+-   Created a line chart comparing COVID-19 trends across six selected countries: Brazil, France, India, Japan, United Kingdom, and United States.
+-   Used `date` as the x-axis with a continuous exact date scale to display daily trends over time.
+-   Used the `Selected Metric` calculated field to allow switching between new cases, new deaths, and vaccination rate.
+-   Added `location` to Color so each country was represented by a separate line.
+-   Applied a location filter to display only the selected countries for easier comparison.
+
+**Validation**
+
+-   Confirmed that changing the Metric Selector updated the visualization correctly.
+-   Verified that each selected country appeared as a separate trend line.
+-   Checked that cases and deaths displayed expected wave patterns over time.
+-   Confirmed that vaccination rate showed an increasing trend during the vaccination period.
+-   Verified that no calculation or filtering errors occurred.
+
+## 2. Continent-Level Trend Comparison
+
+**Visualization Setup**
+
+-   Created a line chart comparing COVID-19 trends across continents.
+-   Used `date` as the x-axis with a continuous exact date scale to display trends over time.
+-   Used the `Selected Metric` calculated field to switch between new cases, new deaths, and vaccination rate.
+-   Replaced `location` with `continent` on the Color shelf so each line represented a continent.
+-   Removed the country filter and kept only the continent filter to exclude missing continent values.
+
+**Validation**
+
+-   Confirmed that each continent was displayed as a separate trend line.
+-   Verified that changing the Metric Selector updated the chart correctly.
+-   Checked that cases and deaths showed expected changes over time.
+-   Confirmed that vaccination rate trends increased during the vaccination period.
+-   Verified that no aggregate records or missing continent categories were included.
+
+------------------------------------------------------------------------
+
+# Dashboard Development
+
+## Overview Dashboard
+
+### Purpose
+
+Created the Overview dashboard page to provide a summary of global COVID-19 trends. The dashboard combines key metrics, time-series trends, and country-level comparisons into a single view.
+
+### Dashboard Setup
+
+-   Created KPI tiles displaying total cases, total deaths, case fatality rate (CFR), and vaccination rate.
+-   Added the global COVID-19 trend chart as the main visualization to show changes in cases, deaths, and vaccination patterns over time.
+-   Included Top 10 country bar charts for total cases and CFR to highlight countries with the highest reported values.
+-   Organized visualizations using a tiled layout with KPI cards at the top, trend analysis in the center, and comparison charts at the bottom.
+
+### Validation
+
+-   Confirmed that all dashboard components displayed correctly without overlapping elements.
+-   Verified that KPI values matched the underlying calculated fields.
+-   Checked that charts maintained consistent formatting and readable labels.
+-   Confirmed that the dashboard layout provided a clear overview of COVID-19 trends before adding interactive filters.
+
+------------------------------------------------------------------------
+
+## Geographic View Dashboard
+
+### Purpose
+
+Created a geographic dashboard to compare COVID-19 outcomes across countries, continents, and income groups.
+
+### Dashboard Setup
+
+-   Added a world choropleth map displaying COVID-19 cases per million.
+-   Added CFR comparison charts by continent and income level.
+-   Applied consistent dashboard formatting with the Overview page.
+-   Added date filtering to update geographic comparisons over time.
+
+### Interactivity
+
+-   Added a map selection action to allow users to explore geographic patterns by selecting countries.
+-   Configured filters so continent comparisons update while maintaining a global reference map.
+
+### Validation
+
+-   Confirmed that map locations displayed correctly.
+-   Verified that date filters updated all connected visualizations.
+-   Checked that dashboard actions and filters behaved as expected.
+
+------------------------------------------------------------------------
+
+## COVID-19 Risk & Comparative Trends Explorer
+
+### Purpose
+
+Created an analytical dashboard to explore relationships between COVID-19 outcomes, vaccination coverage, and country-level trends. The dashboard compares vaccination rates and CFR across countries and allows users to examine trends across selected countries and continents.
+
+### Dashboard Setup
+
+-   Added a scatter plot comparing vaccination rate and case fatality rate (CFR), with each point representing an individual country.
+-   Added a population density vs. CFR scatter plot to explore additional geographic factors associated with COVID-19 outcomes.
+-   Added multi-country and continent-level trend comparison charts to examine changes in COVID-19 metrics over time.
+
+### Country Selector Parameter
+
+-   Reused the existing Country Selector parameter to highlight selected countries across analytical visualizations.
+-   Created a calculated field to identify the selected country:
+
+`IF [location] = [Country Selector] THEN "Selected"`
+
+`ELSE "Other"`
+
+`END`
+
+-   Applied the calculated field to chart colors to highlight the selected country while keeping other countries visible for comparison.
+
+### Validation
+
+-   Confirmed that each scatter plot displayed individual countries as separate points.
+-   Verified that the Country Selector correctly highlighted the selected country across connected visualizations.
+-   Checked that trend charts updated the highlighted country without removing comparison groups.
+-   Confirmed consistent formatting with the Overview and Geographic View dashboards.

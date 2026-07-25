@@ -13,3 +13,6 @@ Interactive Tableau dashboard analyzing global COVID-19 trends, vaccination cove
 
 **Note:**  
 A `.twbx` version of the Tableau workbook is also included in this repository. To open and interact with the workbook locally, please install **Tableau Desktop** or **Tableau Public Desktop**.
+
+## Data Source
+- [Our World in Data COVID-19 Dataset](https://github.com/owid/covid-19-data) – Dataset providing global COVID-19 statistics, including cases, deaths, vaccinations, and other key health indicators.

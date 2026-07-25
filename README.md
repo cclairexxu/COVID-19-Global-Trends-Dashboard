@@ -9,5 +9,7 @@ Interactive Tableau dashboard analyzing global COVID-19 trends, vaccination cove
 - [COVID-19_Tableau_Methodology.html](https://github.com/cclairexxu/covid19-global-trends-dashboard/blob/main/COVID-19_Tableau_Methodology.html) – Rendered HTML version of the Quarto documentation for viewing the completed project methodology and results.
 **Download the HTML file to view the full formatted document.**
 
-- [COVID-19 Global Trends Dashboard.twbx](https://public.tableau.com/app/profile/claire.xu6324/viz/COVID-19GlobalTrendsDashboard_17847654265670/Overview)
+- [COVID-19 Global Trends Dashboard (Tableau Public)](https://public.tableau.com/app/profile/claire.xu6324/viz/COVID-19GlobalTrendsDashboard_17847654265670/Overview) – Interactive Tableau Public dashboard featuring three dashboard pages that explore global COVID-19 trends, geographic patterns, vaccination coverage, and case fatality rates.
 
+**Note:**  
+A `.twbx` version of the Tableau workbook is also included in this repository. To open and interact with the workbook locally, please install **Tableau Desktop** or **Tableau Public Desktop**.

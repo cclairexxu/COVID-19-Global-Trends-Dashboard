@@ -521,11 +521,11 @@ Created trend comparison visualizations to compare COVID-19 patterns across mult
 
 # Dashboard Development
 
-## Overview Dashboard
+## Global Analytics Dashboard for COVID-19
 
 ### Purpose
 
-Created the Overview dashboard page to provide a summary of global COVID-19 trends. The dashboard combines key metrics, time-series trends, and country-level comparisons into a single view.
+Created the Global Analytics (Overview) dashboard page to provide a summary of global COVID-19 trends. The dashboard combines key metrics, time-series trends, and country-level comparisons into a single view.
 
 ### Dashboard Setup
 
@@ -543,7 +543,7 @@ Created the Overview dashboard page to provide a summary of global COVID-19 tren
 
 ------------------------------------------------------------------------
 
-## Geographic View Dashboard
+## Geographic Patterns for COVID-19
 
 ### Purpose
 
@@ -569,7 +569,7 @@ Created a geographic dashboard to compare COVID-19 outcomes across countries, co
 
 ------------------------------------------------------------------------
 
-## COVID-19 Risk & Comparative Trends Explorer
+## Risk & Comparative Trends Explorer for COVID-19 
 
 ### Purpose
 
